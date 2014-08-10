@@ -11,20 +11,30 @@
 				var attribute = superType.prototype[name];
 				type.prototype[name] = attribute;
 			}
-			type.prototype._super = function _super(name) {
-				return superType.prototype[name].bind(this);
-			}
 
 			return type;
 		}
 		function extend(type, attributes, namedAttributes) {
+			function setAttribute(name, attribute) {
+				if (name in type.prototype) {
+					attribute._super = (function(superAttribute) {
+						function _super(self) {
+							return superAttribute.bind(self);
+						};
+						_super._super = setAttribute._super;
+						return _super;
+					})(type.prototype[name]);
+				}
+				type.prototype[name] = attribute;
+			}
+
 			for (var i in attributes) {
 				var attribute = attributes[i];
-				type.prototype[attribute.name] = attribute;
+				setAttribute(attribute.name, attribute);
 			}
 			for (var name in namedAttributes) {
 				var attribute = namedAttributes[name];
-				type.prototype[name] = attribute;
+				setAttribute(name, attribute);
 			}
 			return type;
 		}
@@ -39,7 +49,10 @@
 				this.number = ko.observable(0);
 				this.numberRate = ko.observable(1);
 				this.buyed = ko.observableArray([]);
-				this.buyables = ko.observableArray([buyables.get('natural', this)]);
+				this.buyables = ko.observableArray([
+					buyables.get('natural', this),
+					buyables.get('integer', this),
+				]);
 			},
 			function tick() {
 				this.number(this.number() + this.numberRate());
@@ -66,20 +79,39 @@
 			function unboost(rate) {
 				this.numberRate(this.numberRate() - rate);
 			},
-			function hasBuyable(name) {
+			function hasBuyable(buyable) {
+				return this.buyables.indexOf(buyable);
+			},
+			function getBuyable(name) {
+				return this.buyables().filter(function (buyable){
+					return buyable.name() == name;
+				})[0];
+			},
+			function addBuyable(buyable) {
+				if (this.hasBuyable(buyable)) {
+					return;
+				}
+				this.buyables.push(buyable);
+			},
+			function removeBuyable(buyable) {
+				if (!this.hasBuyable(buyable)) {
+					return;
+				}
+				this.buyables.remove(buyable);
+			},
+			function hasBuyed(name) {
 				return this.buyed.indexOf(name) != -1;
 			},
-			function addBuyable(name) {
-				if (this.hasBuyable(name)) {
+			function addBuyed(name) {
+				if (this.hasBuyed(name)) {
 					return;
 				}
 				this.buyed.push(name);
 			},
-			function removeBuyable(name) {
-				if (!this.hasBuyable(name)) {
+			function removeBuyed(name) {
+				if (!this.hasBuyed(name)) {
 					return;
 				}
-				var index = this.buyed.indexOf(name);
 				this.buyed.remove(name);
 			}
 		]);
@@ -91,7 +123,7 @@
 		extend(BuyableModel, [
 			function init(args, game) {
 				args = args || {};
-				this.name = args.name;
+				this.name = ko.observable(args.name || "");
 				this.cost = args.cost;
 				this.game = game;
 			},
@@ -103,7 +135,7 @@
 					return false;
 				}
 				this.game.buy(this.cost);
-				this.game.addBuyable(this.name);
+				this.game.addBuyed(this.name());
 
 				return true;
 			},
@@ -117,15 +149,15 @@
 		extend(BuildingModel, [
 			function init(args, game) {
 				args = args || {};
-				this._super('init')(args, game);
-				this.rate = args.rate;
+				init._super(this)(args, game);
+				this.rate = ko.observable(args.rate);
 				this.count = ko.observable(0);
 			},
 			function buy() {
-				if (!this._super('buy')()) {
+				if (!buy._super(this)()) {
 					return;
 				}
-				this.game.boost(this.rate);
+				this.game.boost(this.rate());
 				this.count(this.count() + 1);
 			},
 			function canSell() {
@@ -136,22 +168,75 @@
 					return;
 				}
 				this.game.sell(this.cost);
-				this.game.unboost(this.rate);
+				this.game.unboost(this.rate());
 				this.count(this.count() - 1);
 				if (!this.count()) {
-					this.game.removeBuyable(this.name);
+					this.game.removeBuyed(this.name());
 				}
 			}
 		], {
 			template: 'buildingTemplate',
 		});
 
+		inherit(ResearchModel, BuyableModel);
+		function ResearchModel() {
+			this.init.apply(this, arguments);
+		}
+
+		extend(ResearchModel, [
+			function init(args, game) {
+				args = args || {};
+				init._super(this)(args, game);
+				this.description = args.description;
+			},
+			function canBuy() {
+				if (!canBuy._super(this)()) {
+					return false;
+				}
+				return !this.game.hasBuyed(this.name());
+			},
+			function buy() {
+				if (!buy._super(this)()) {
+					return;
+				}
+				this.research();
+			}
+		], {
+			template: 'researchTemplate',
+		});
+
+		inherit(ImproveResearchModel, ResearchModel);
+		function ImproveResearchModel() {
+			this.init.apply(this, arguments);
+		}
+
+		extend(ImproveResearchModel, [
+			function init(args, game) {
+				args = args || {};
+				init._super(this)(args, game);
+				this.target = args.target;
+				this.renameTo = args.renameTo;
+				this.rateMultiply = args.rateMultiply;
+			},
+			function research() {
+				var target = this.game.getBuyable(this.target);
+				target.name(this.renameTo);
+				var oldRate = target.rate(), newRate = oldRate * this.rateMultiply;
+				target.rate(newRate);
+				var deltaRate = newRate - oldRate;
+				var deltaTotalRate = deltaRate * target.count();
+				this.game.boost(deltaTotalRate);
+				this.game.removeBuyable(this);
+			},
+		]);
+
 		var buyables = {
 			get: function get(name, game) {
 				var data =this[name];
 				return new data.type(data.args, game);
 			},
-			natural: {type: BuildingModel, args: {name: 'Natural', cost: 3, rate: 0.5}},
+			natural: {type: BuildingModel, args: {name: 'Naturals', cost: 1.5, rate: 0.25}},
+			integer: {type: ImproveResearchModel, args: {name: 'Integers', description: 'There are also negative numbers', cost: 3, target: 'Naturals', renameTo: 'Integers', rateMultiply: 2}},
 		};
 	</script>
 </head>
@@ -174,6 +259,14 @@
 			for <span data-bind="text: cost"></span>#
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>
 			<button data-bind="enable: canSell(), click: sell">Sell</button>
+		</li>
+	</script>
+	<script type="text/html" id="researchTemplate">
+		<li>
+			<span data-bind="text: name"></span>
+			for <span data-bind="text: cost"></span>#
+			<span data-bind="text: description"></span>
+			<button data-bind="enable: canBuy(), click: buy">Buy</button>
 		</li>
 	</script>
 </body>
