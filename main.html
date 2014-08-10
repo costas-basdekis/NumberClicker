@@ -1,0 +1,66 @@
+<html>
+<head>
+	<title>Number clicker</title>
+	<script type="text/javascript" src="js/lib/knockout-3.1.0.js"></script>
+	<script type="text/javascript">
+		function elById(id) {
+			return document.getElementById(id);
+		}
+		function extend(type, attributes) {
+			for (var i in attributes) {
+				var attribute = attributes[i];
+				type.prototype[attribute.name] = attribute;
+			}
+			return type;
+		}
+	</script>
+	<script type="text/javascript">
+		function GameModel() {
+			this.init.apply(this, arguments);
+		}
+
+		extend(GameModel, [
+			function init() {
+				this.number = ko.observable(0);
+				this.numberRate = ko.observable(1);
+			},
+			function tick() {
+				this.number(this.number() + this.numberRate());
+			},
+			function tick_start(interval) {
+				this.tick_stop();
+				this.tick.interval = setInterval(this.tick.bind(this), interval || 1000);
+			},
+			function tick_stop() { 
+				this.tick.interval = clearInterval(this.tick.interval);
+			},
+			function canBuy(cost) {
+				return this.number() <= cost;
+			},
+			function buy(cost) {
+				this.number(this.number() - cost);
+			},
+			function sell(cost) {
+				this.number(this.number() + cost);
+			},
+			function boost(rate) {
+				this.numberRate(this.numberRate + rate);
+			},
+			function unboost(rate) {
+				this.numberRate(this.numberRate - rate);
+			},
+		]);
+	</script>
+</head>
+<body>
+	<p id="myGame">
+		Number: <span data-bind="text: number"></span>#
+		(+<span data-bind="text: numberRate"></span>#/s)
+	</p>
+</body>
+	<script type="text/javascript">
+		var myGame = new GameModel();
+		ko.applyBindings(myGame, elById('myGame'));
+		myGame.tick_start();
+	</script>
+</html>
