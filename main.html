@@ -6,10 +6,25 @@
 		function elById(id) {
 			return document.getElementById(id);
 		}
-		function extend(type, attributes) {
+		function inherit(type, superType) {
+			for (var name in superType.prototype) {
+				var attribute = superType.prototype[name];
+				type.prototype[name] = attribute;
+			}
+			type.prototype._super = function _super(name) {
+				return superType.prototype[name].bind(this);
+			}
+
+			return type;
+		}
+		function extend(type, attributes, namedAttributes) {
 			for (var i in attributes) {
 				var attribute = attributes[i];
 				type.prototype[attribute.name] = attribute;
+			}
+			for (var name in namedAttributes) {
+				var attribute = namedAttributes[name];
+				type.prototype[name] = attribute;
 			}
 			return type;
 		}
@@ -74,11 +89,10 @@
 		}
 
 		extend(BuyableModel, [
-			function init(name, cost, rate, game) {
-				this.name = name;
-				this.cost = cost;
-				this.rate = rate;
-				this.count = ko.observable(0);
+			function init(args, game) {
+				args = args || {};
+				this.name = args.name;
+				this.cost = args.cost;
 				this.game = game;
 			},
 			function canBuy() {
@@ -86,11 +100,32 @@
 			},
 			function buy() {
 				if (!this.canBuy()) {
-					return;
+					return false;
 				}
 				this.game.buy(this.cost);
-				this.game.boost(this.rate);
 				this.game.addBuyable(this.name);
+
+				return true;
+			},
+		]);
+
+		inherit(BuildingModel, BuyableModel);
+		function BuildingModel() {
+			BuyableModel.apply(this, arguments);
+		}
+
+		extend(BuildingModel, [
+			function init(args, game) {
+				args = args || {};
+				this._super('init')(args, game);
+				this.rate = args.rate;
+				this.count = ko.observable(0);
+			},
+			function buy() {
+				if (!this._super('buy')()) {
+					return;
+				}
+				this.game.boost(this.rate);
 				this.count(this.count() + 1);
 			},
 			function canSell() {
@@ -107,14 +142,16 @@
 					this.game.removeBuyable(this.name);
 				}
 			}
-		]);
+		], {
+			template: 'buildingTemplate',
+		});
 
 		var buyables = {
 			get: function get(name, game) {
 				var data =this[name];
-				return new BuyableModel(data.name, data.cost, data.rate, game);
+				return new data.type(data.args, game);
 			},
-			natural: {name: 'Natural', cost: 3, rate: 0.5},
+			natural: {type: BuildingModel, args: {name: 'Natural', cost: 3, rate: 0.5}},
 		};
 	</script>
 </head>
@@ -123,13 +160,13 @@
 		Number: <span data-bind="text: number"></span>#
 		(+<span data-bind="text: numberRate"></span>#/s)
 		<ul data-bind="template: { name: 'buyedTemplate', foreach: buyed, as: 'buyed' }"></ul>
-		<ul data-bind="template: { name: 'buyableTemplate', foreach: buyables, as: 'buyable' }">
+		<ul data-bind="template: { name: function(buyable){return buyable.template;}, foreach: buyables, as: 'buyable' }">
 		</ul>
 	</div>
 	<script type="text/html" id="buyedTemplate">
 		<li><span data-bind="text: $data"></span></li>
 	</script>
-	<script type="text/html" id="buyableTemplate">
+	<script type="text/html" id="buildingTemplate">
 		<li>
 			<span data-bind="text: name"></span>
 			x<span data-bind="text: count"></span>
