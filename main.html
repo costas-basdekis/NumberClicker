@@ -23,6 +23,8 @@
 			function init() {
 				this.number = ko.observable(0);
 				this.numberRate = ko.observable(1);
+				this.buyed = ko.observableArray([]);
+				this.buyables = ko.observableArray([buyables.get('natural', this)]);
 			},
 			function tick() {
 				this.number(this.number() + this.numberRate());
@@ -35,7 +37,7 @@
 				this.tick.interval = clearInterval(this.tick.interval);
 			},
 			function canBuy(cost) {
-				return this.number() <= cost;
+				return this.number() >= cost;
 			},
 			function buy(cost) {
 				this.number(this.number() - cost);
@@ -44,19 +46,99 @@
 				this.number(this.number() + cost);
 			},
 			function boost(rate) {
-				this.numberRate(this.numberRate + rate);
+				this.numberRate(this.numberRate() + rate);
 			},
 			function unboost(rate) {
-				this.numberRate(this.numberRate - rate);
+				this.numberRate(this.numberRate() - rate);
 			},
+			function hasBuyable(name) {
+				return this.buyed.indexOf(name) != -1;
+			},
+			function addBuyable(name) {
+				if (this.hasBuyable(name)) {
+					return;
+				}
+				this.buyed.push(name);
+			},
+			function removeBuyable(name) {
+				if (!this.hasBuyable(name)) {
+					return;
+				}
+				var index = this.buyed.indexOf(name);
+				this.buyed.remove(name);
+			}
 		]);
+
+		function BuyableModel() {
+			this.init.apply(this, arguments);
+		}
+
+		extend(BuyableModel, [
+			function init(name, cost, rate, game) {
+				this.name = name;
+				this.cost = cost;
+				this.rate = rate;
+				this.count = ko.observable(0);
+				this.game = game;
+			},
+			function canBuy() {
+				return this.game.canBuy(this.cost);
+			},
+			function buy() {
+				if (!this.canBuy()) {
+					return;
+				}
+				this.game.buy(this.cost);
+				this.game.boost(this.rate);
+				this.game.addBuyable(this.name);
+				this.count(this.count() + 1);
+			},
+			function canSell() {
+				return this.count() > 0;
+			},
+			function sell() {
+				if (this.count() <= 0) {
+					return;
+				}
+				this.game.sell(this.cost);
+				this.game.unboost(this.rate);
+				this.count(this.count() - 1);
+				if (!this.count()) {
+					this.game.removeBuyable(this.name);
+				}
+			}
+		]);
+
+		var buyables = {
+			get: function get(name, game) {
+				var data =this[name];
+				return new BuyableModel(data.name, data.cost, data.rate, game);
+			},
+			natural: {name: 'Natural', cost: 3, rate: 0.5},
+		};
 	</script>
 </head>
 <body>
-	<p id="myGame">
+	<div id="myGame">
 		Number: <span data-bind="text: number"></span>#
 		(+<span data-bind="text: numberRate"></span>#/s)
-	</p>
+		<ul data-bind="template: { name: 'buyedTemplate', foreach: buyed, as: 'buyed' }"></ul>
+		<ul data-bind="template: { name: 'buyableTemplate', foreach: buyables, as: 'buyable' }">
+		</ul>
+	</div>
+	<script type="text/html" id="buyedTemplate">
+		<li><span data-bind="text: $data"></span></li>
+	</script>
+	<script type="text/html" id="buyableTemplate">
+		<li>
+			<span data-bind="text: name"></span>
+			x<span data-bind="text: count"></span>
+			+<span data-bind="text: rate"></span>#/s
+			for <span data-bind="text: cost"></span>#
+			<button data-bind="enable: canBuy(), click: buy">Buy</button>
+			<button data-bind="enable: canSell(), click: sell">Sell</button>
+		</li>
+	</script>
 </body>
 	<script type="text/javascript">
 		var myGame = new GameModel();
