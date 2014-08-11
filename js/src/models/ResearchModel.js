@@ -7,6 +7,7 @@ extend(ResearchModel, [
 	function init(args, game) {
 		args = args || {};
 		init._super(this)(args, game);
+		this.caption = args.caption;
 		this.description = args.description;
 		this.bought = ko.observable(false);
 	},
