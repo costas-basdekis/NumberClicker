@@ -22,9 +22,11 @@ extend(GameModel, [
 			});
 		}
 		function addBuyableOnEnabled(buyable) {
+			var added = false;
 			buyable.enabled.subscribe(function onEnabledChange(newValue) {
-				if (newValue) {
+				if (!added) {
 					game.availables.push(buyable);
+					added = true;
 				}
 			}, 'change');
 		}
