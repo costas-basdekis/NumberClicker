@@ -2,258 +2,16 @@
 <head>
 	<title>Number clicker</title>
 	<script type="text/javascript" src="js/lib/knockout-3.1.0.js"></script>
-	<script type="text/javascript">
-		function elById(id) {
-			return document.getElementById(id);
-		}
-		function inherit(type, superType) {
-			for (var name in superType.prototype) {
-				var attribute = superType.prototype[name];
-				type.prototype[name] = attribute;
-			}
+	<script type="text/javascript" src="js/src/utils.js"></script>
 
-			return type;
-		}
-		function extend(type, attributes, namedAttributes) {
-			function setAttribute(name, attribute) {
-				if (name in type.prototype) {
-					attribute._super = (function(superAttribute) {
-						function _super(self) {
-							return superAttribute.bind(self);
-						};
-						_super._super = setAttribute._super;
-						return _super;
-					})(type.prototype[name]);
-				}
-				type.prototype[name] = attribute;
-			}
+	<script type="text/javascript" src="js/src/models/GameModel.js"></script>
 
-			for (var i in attributes) {
-				var attribute = attributes[i];
-				setAttribute(attribute.name, attribute);
-			}
-			for (var name in namedAttributes) {
-				var attribute = namedAttributes[name];
-				setAttribute(name, attribute);
-			}
-			return type;
-		}
-	</script>
-	<script type="text/javascript">
-		function GameModel() {
-			this.init.apply(this, arguments);
-		}
+	<script type="text/javascript" src="js/src/models/BuyableModel.js"></script>
+	<script type="text/javascript" src="js/src/models/BuildingModel.js"></script>
+	<script type="text/javascript" src="js/src/models/ResearchModel.js"></script>
+	<script type="text/javascript" src="js/src/models/ImproveResearchModel.js"></script>
 
-		extend(GameModel, [
-			function init() {
-				this.number = ko.observable(0);
-				this.numberRate = ko.observable(1);
-				this.buyed = ko.observableArray([]);
-				this.availables = ko.observableArray([]);
-				this.buyables = buyables;
-				buyables.create(this);
-			},
-			function tick() {
-				this.number(this.number() + this.numberRate());
-			},
-			function tick_start(interval) {
-				this.tick_stop();
-				this.tick.interval = setInterval(this.tick.bind(this), interval || 1000);
-			},
-			function tick_stop() { 
-				this.tick.interval = clearInterval(this.tick.interval);
-			},
-			function canBuy(cost) {
-				return this.number() >= cost;
-			},
-			function buy(cost) {
-				this.number(this.number() - cost);
-			},
-			function sell(cost) {
-				this.number(this.number() + cost);
-			},
-			function boost(rate) {
-				this.numberRate(this.numberRate() + rate);
-			},
-			function unboost(rate) {
-				this.numberRate(this.numberRate() - rate);
-			},
-			function addBuyed(item) {
-				if (this.buyed.indexOf(item) == -1) {
-					this.buyed.push(item);
-				}
-			},
-		]);
-
-		function BuyableModel() {
-			this.init.apply(this, arguments);
-		}
-
-		extend(BuyableModel, [
-			function init(args, game) {
-				args = args || {};
-				this.originalName = args.name || "";
-				this.name = ko.observable(this.originalName);
-				this.cost = args.cost;
-				this.enabled = args.enabled;
-				this.game = game;
-			},
-			function canBuy() {
-				return this.game.canBuy(this.cost);
-			},
-			function buy() {
-				if (!this.canBuy()) {
-					return false;
-				}
-				this.game.buy(this.cost);
-				this.game.addBuyed(this);
-
-				return true;
-			},
-		]);
-
-		inherit(BuildingModel, BuyableModel);
-		function BuildingModel() {
-			this.init.apply(this, arguments);
-		}
-
-		extend(BuildingModel, [
-			function init(args, game) {
-				args = args || {};
-				init._super(this)(args, game);
-				this.rate = ko.observable(args.rate);
-				this.count = ko.observable(0);
-			},
-			function buy() {
-				if (!buy._super(this)()) {
-					return;
-				}
-				this.game.boost(this.rate());
-				this.count(this.count() + 1);
-			},
-			function canSell() {
-				return this.count() > 0;
-			},
-			function sell() {
-				if (this.count() <= 0) {
-					return;
-				}
-				this.game.sell(this.cost);
-				this.game.unboost(this.rate());
-				this.count(this.count() - 1);
-				if (!this.count()) {
-					this.game.buyed.remove(this);
-				}
-			}
-		], {
-			template: 'buildingTemplate',
-		});
-
-		inherit(ResearchModel, BuyableModel);
-		function ResearchModel() {
-			this.init.apply(this, arguments);
-		}
-
-		extend(ResearchModel, [
-			function init(args, game) {
-				args = args || {};
-				init._super(this)(args, game);
-				this.description = args.description;
-				this.bought = ko.observable(false);
-			},
-			function canBuy() {
-				if (!canBuy._super(this)()) {
-					return false;
-				}
-				return !this.bought();
-			},
-			function buy() {
-				if (!buy._super(this)()) {
-					return;
-				}
-				this.research();
-				this.bought(true);
-			}
-		], {
-			template: 'researchTemplate',
-		});
-
-		inherit(ImproveResearchModel, ResearchModel);
-		function ImproveResearchModel() {
-			this.init.apply(this, arguments);
-		}
-
-		extend(ImproveResearchModel, [
-			function init(args, game) {
-				args = args || {};
-				init._super(this)(args, game);
-				this.target = args.target;
-				this.renameTo = args.renameTo;
-				this.rateMultiply = args.rateMultiply;
-			},
-			function research() {
-				var target = this.game.buyables[this.target];
-				if (this.renameTo) {
-					target.name(this.renameTo);
-				}
-				var oldRate = target.rate(), newRate = oldRate * this.rateMultiply;
-				target.rate(newRate);
-				var deltaRate = newRate - oldRate;
-				var deltaTotalRate = deltaRate * target.count();
-				this.game.boost(deltaTotalRate);
-				this.game.availables.remove(this);
-			},
-		]);
-
-		var buyables = {
-			create: function create(game) {
-				var gameStarted = ko.observable(false);
-
-				function getEnabledComputed(buyableEnabled) {
-					return ko.computed(function enabledComputed() {
-						return gameStarted() && buyableEnabled();
-					});
-				}
-				function addBuyableOnEnabled(buyable) {
-					buyable.enabled.subscribe(function onEnabledChange(newValue) {
-						game.availables.push(buyable);
-					}, 'change');
-				}
-
-				for (var name in this.items) {
-					var buyable = this.items[name];
-					buyable.enabled = getEnabledComputed(buyable.enabled);
-					addBuyableOnEnabled(buyable);
-					buyable.game = game;
-					game.buyables[name] = buyable;
-				}
-
-				gameStarted(true);
-			},
-			items: {
-				natural: new BuildingModel({
-					name: 'Naturals', cost: 1.5, rate: 0.25,
-					enabled: function() {
-						return true;
-					},}),
-				integer: new ImproveResearchModel({
-					name: 'Integers', cost: 3, target: 'natural',
-					description: 'There are also negative numbers',
-					renameTo: 'Integers', rateMultiply: 2,
-					enabled: function(){
-						return this.buyables.natural.count() >= 2;
-					},}),
-				isomorphisms: new ImproveResearchModel({
-					name: 'Isomorphisms', cost: 3, target: 'natural',
-					description: 'There are many ways to slice the kibosh',
-					rateMultiply: 1.5,
-					enabled: function(){
-						return this.buyables.natural.count() >= 5 &&
-							   this.buyables.integer.bought();
-					},}),
-			},
-		};
-	</script>
+	<script type="text/javascript" src="js/src/buyables.js"></script>
 </head>
 <body>
 	<div id="myGame">
@@ -263,6 +21,7 @@
 		<ul data-bind="template: { name: function(buyable){return buyable.template;}, foreach: availables, as: 'buyable' }">
 		</ul>
 	</div>
+
 	<script type="text/html" id="buyedTemplate">
 		<li><span data-bind="text: originalName"></span></li>
 	</script>
@@ -284,10 +43,11 @@
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>
 		</li>
 	</script>
-</body>
+	
 	<script type="text/javascript">
 		var myGame = new GameModel();
 		ko.applyBindings(myGame, elById('myGame'));
 		myGame.tick_start();
 	</script>
+</body>
 </html>
