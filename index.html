@@ -15,8 +15,8 @@
 </head>
 <body>
 	<div id="myGame">
-		Number: <span data-bind="text: number"></span>#
-		(+<span data-bind="text: numberRate"></span>Hz)
+		Number: <span data-bind="text: compactNumber(number())"></span>#
+		(+<span data-bind="text: compactNumber(numberRate())"></span>Hz)
 		<ul data-bind="template: { name: 'buyedTemplate', foreach: buyed, as: 'buyed' }"></ul>
 		<ul data-bind="template: { name: function(buyable){return buyable.template;}, foreach: availables, as: 'buyable' }">
 		</ul>
@@ -29,8 +29,8 @@
 		<li>
 			<span data-bind="text: name"></span>
 			x<span data-bind="text: count"></span>
-			+<span data-bind="text: rate"></span>Hz
-			for <span data-bind="text: cost"></span>#
+			+<span data-bind="text: compactNumber(rate())"></span>Hz
+			for <span data-bind="text: compactNumber(cost)"></span>#
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>
 			<button data-bind="enable: canSell(), click: sell">Sell</button>
 		</li>
@@ -38,7 +38,7 @@
 	<script type="text/html" id="researchTemplate">
 		<li>
 			<span data-bind="text: name"></span>
-			for <span data-bind="text: cost"></span>#
+			for <span data-bind="text: compactNumber(cost)"></span>#
 			<span data-bind="text: caption"></span>
 			(<span data-bind="text: description"></span>)
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>

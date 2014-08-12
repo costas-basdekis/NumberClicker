@@ -33,3 +33,23 @@ function extend(type, attributes, namedAttributes) {
 	}
 	return type;
 }
+
+function compactNumber(number, maxAfterComma) {
+	if (maxAfterComma == undefined) {
+		maxAfterComma = 2;
+	}
+	var suffix = '';
+	var suffixes = 'KMGTPEHOND';
+	for (var i = 0, suf ; suf = suffixes[i] ; i++) {
+		if (number < 1000) {
+			break;
+		}
+		number = number / 1000;
+		suffix = suf;
+	}
+	var integral = parseInt(number), integralLength = integral.toString().length;
+	var afterComma = integralLength > maxAfterComma + 1 ? 0 : maxAfterComma + 1 - integralLength;
+	var pow = Math.pow(10, afterComma);
+	number = parseInt(number * pow) / pow;
+	return number + suffix;
+}
