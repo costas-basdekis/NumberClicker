@@ -18,9 +18,6 @@ extend(ImproveResearchModel, [
 		}
 		var oldRate = target.rate(), newRate = oldRate * this.rateMultiply;
 		target.rate(newRate);
-		var deltaRate = newRate - oldRate;
-		var deltaTotalRate = deltaRate * target.count();
-		this.game.boost(deltaTotalRate);
 		this.game.availables.remove(this);
 	},
 ]);

@@ -5,9 +5,22 @@ function GameModel() {
 extend(GameModel, [
 	function init() {
 		this.number = ko.observable(0);
-		this.numberRate = ko.observable(1);
 		this.buyed = ko.observableArray([]);
 		this.availables = ko.observableArray([]);
+		var self = this;
+		this.numberRate = ko.computed(function () {
+			var rate = 1;
+
+			var availables = self.availables()
+
+			for (var i = 0, buyable ; buyable = availables[i] ; i++) {
+				if (buyable.rate && buyable.count) {
+					rate += buyable.rate() * buyable.count();
+				}
+			}
+
+			return rate;
+		});
 		this.buyables = buyables;
 		this.initBuyables();
 	},
@@ -59,12 +72,6 @@ extend(GameModel, [
 	},
 	function sell(cost) {
 		this.number(this.number() + cost);
-	},
-	function boost(rate) {
-		this.numberRate(this.numberRate() + rate);
-	},
-	function unboost(rate) {
-		this.numberRate(this.numberRate() - rate);
 	},
 	function addBuyed(item) {
 		if (this.buyed.indexOf(item) == -1) {
