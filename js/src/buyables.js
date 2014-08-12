@@ -88,4 +88,44 @@ var buyables = {
 			return this.buyables.algebraics.count() >= 5 &&
 				   this.buyables.reals.bought();
 		},}),
+	sets: new BuildingModel({
+		name: 'Sets',
+		cost: 25,
+		rate: 10,
+		enabled: function() {
+			return this.buyables.algebraics.count() >= 10;
+		},}),
+	powersets: new ImproveResearchModel({
+		name: 'Powersets',
+		caption: 'You can have sets of sets',
+		description: '+10Hz for sets',
+		cost: 65,
+		target: 'sets',
+		renameTo: 'Powersets',
+		rateMultiply: 2,
+		enabled: function(){
+			return this.buyables.sets.count() >= 2;
+		},}),
+	frege: new ImproveResearchModel({
+		name: 'Frege',
+		caption: 'Surely a set can and/or can\'t contain itself',
+		description: '+10Hz for Powersets',
+		cost: 85,
+		target: 'sets',
+		rateMultiply: 1.5,
+		enabled: function(){
+			return this.buyables.sets.count() >= 5 &&
+				   this.buyables.powersets.bought();
+		},}),
+	russell: new ImproveResearchModel({
+		name: 'Bertrand Russell',
+		caption: 'We don\'t need barbers where we\'re going',
+		description: '+10Hz for Powersets',
+		cost: 110,
+		target: 'sets',
+		rateMultiply: 4/3,
+		enabled: function(){
+			return this.buyables.sets.count() >= 10 &&
+				   this.buyables.frege.bought();
+		},}),
 };
