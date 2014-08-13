@@ -25,5 +25,6 @@ extend(ResearchModel, [
 		this.bought(true);
 	}
 ], {
-	template: 'researchTemplate',
+	availableTemplate: 'availableResearchTemplate',
+	buyedTemplate: 'buyedResearchTemplate',
 });

@@ -30,5 +30,6 @@ extend(BuildingModel, [
 		}
 	}
 ], {
-	template: 'buildingTemplate',
+	availableTemplate: 'availableBuildingTemplate',
+	buyedTemplate: 'buyedBuildingTemplate',
 });

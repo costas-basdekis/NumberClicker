@@ -17,15 +17,21 @@
 	<div id="myGame">
 		Number: <span data-bind="text: compactNumber(number())"></span>#
 		(+<span data-bind="text: compactNumber(numberRate())"></span>Hz)
-		<ul data-bind="template: { name: 'buyedTemplate', foreach: buyed, as: 'buyed' }"></ul>
-		<ul data-bind="template: { name: function(buyable){return buyable.template;}, foreach: availables, as: 'buyable' }">
+		<ul data-bind="template: { name: function(buyable){return buyable.buyedTemplate;}, foreach: buyed, as: 'buyed' }"></ul>
+		<ul data-bind="template: { name: function(buyable){return buyable.availableTemplate;}, foreach: availables, as: 'buyable' }">
 		</ul>
 	</div>
 
-	<script type="text/html" id="buyedTemplate">
+	<script type="text/html" id="buyedBuildingTemplate">
 		<li><span data-bind="text: originalName"></span></li>
 	</script>
-	<script type="text/html" id="buildingTemplate">
+	<script type="text/html" id="buyedResearchTemplate">
+		<li>
+			<span data-bind="text: originalName"></span>
+			<span data-bind="text: caption"></span>
+		</li>
+	</script>
+	<script type="text/html" id="availableBuildingTemplate">
 		<li>
 			<span data-bind="text: name"></span>
 			x<span data-bind="text: count"></span>
@@ -35,7 +41,7 @@
 			<button data-bind="enable: canSell(), click: sell">Sell</button>
 		</li>
 	</script>
-	<script type="text/html" id="researchTemplate">
+	<script type="text/html" id="availableResearchTemplate">
 		<li>
 			<span data-bind="text: name"></span>
 			for <span data-bind="text: compactNumber(cost)"></span>#
