@@ -10,6 +10,7 @@ extend(ImproveResearchModel, [
 		this.target = args.target;
 		this.renameTo = args.renameTo;
 		this.rateMultiply = args.rateMultiply;
+		this.rateAdd = args.rateAdd;
 	},
 	function research() {
 		research._super(this)();
@@ -17,7 +18,13 @@ extend(ImproveResearchModel, [
 		if (this.renameTo) {
 			target.name(this.renameTo);
 		}
-		var oldRate = target.rate(), newRate = oldRate * this.rateMultiply;
+		var oldRate = target.rate(),
+			newRate = oldRate;
+		if (this.rateMultiply) {
+			newRate *= this.rateMultiply;
+		} else if (this.rateAdd) {
+			newRate += this.rateAdd;
+		}
 		target.rate(newRate);
 	},
 ]);
