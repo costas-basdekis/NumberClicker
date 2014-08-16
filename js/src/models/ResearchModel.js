@@ -23,7 +23,10 @@ extend(ResearchModel, [
 		}
 		this.research();
 		this.bought(true);
-	}
+	},
+	function research() {
+		this.game.availables.remove(this);
+	},
 ], {
 	availableTemplate: 'availableResearchTemplate',
 	buyedTemplate: 'buyedResearchTemplate',

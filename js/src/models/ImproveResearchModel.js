@@ -12,12 +12,12 @@ extend(ImproveResearchModel, [
 		this.rateMultiply = args.rateMultiply;
 	},
 	function research() {
+		research._super(this)();
 		var target = this.game.buyables[this.target];
 		if (this.renameTo) {
 			target.name(this.renameTo);
 		}
 		var oldRate = target.rate(), newRate = oldRate * this.rateMultiply;
 		target.rate(newRate);
-		this.game.availables.remove(this);
 	},
 ]);
