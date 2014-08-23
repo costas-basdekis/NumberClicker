@@ -75,3 +75,12 @@ function keys(obj) {
 
 	return keys;
 }
+
+function resourcesFromList(resourcesList) {
+	var resources = {};
+	for (var i = 0, resource ; resource = resourcesList[i] ; i++) {
+		resources[resource.id] = resource;
+	}
+
+	return resources;
+}
