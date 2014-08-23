@@ -9,6 +9,8 @@ extend(BuildingModel, [
 		init._super(this)(args, game);
 		this.rate = ko.observable(args.rate);
 		this.count = ko.observable(0);
+		this.totalRate = ko.computed(this.totalRateFunction.bind(this));
+		this.resourceId = args.resourceId;
 	},
 	function buy() {
 		if (!buy._super(this)()) {
@@ -28,7 +30,14 @@ extend(BuildingModel, [
 		if (!this.count()) {
 			this.game.buyed.remove(this);
 		}
-	}
+	},
+	function totalRateFunction() {
+		return this.rate().scale(this.count());
+	},
+	function productionCycle(resources) {
+		var totalRate = this.totalRate();
+		resources.i_add(totalRate);
+	},
 ], {
 	availableTemplate: 'availableBuildingTemplate',
 	buyedTemplate: 'buyedBuildingTemplate',

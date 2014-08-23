@@ -4,6 +4,9 @@
 	<script type="text/javascript" src="js/lib/knockout-3.1.0.js"></script>
 	<script type="text/javascript" src="js/src/utils.js"></script>
 
+	<script type="text/javascript" src="js/src/NamedScalar.js"></script>
+	<script type="text/javascript" src="js/src/Resources.js"></script>
+
 	<script type="text/javascript" src="js/src/models/GameModel.js"></script>
 
 	<script type="text/javascript" src="js/src/models/BuyableModel.js"></script>
@@ -11,16 +14,24 @@
 	<script type="text/javascript" src="js/src/models/ResearchModel.js"></script>
 	<script type="text/javascript" src="js/src/models/ImproveResearchModel.js"></script>
 
-	<script type="text/javascript" src="js/src/buyables.js"></script>
+	<script type="text/javascript" src="js/src/models/ResourceModel.js"></script>
+
+	<script type="text/javascript" src="js/games/numbers/buyables.js"></script>
+	<script type="text/javascript" src="js/games/numbers/resources.js"></script>
 </head>
 <body>
 	<div id="myGame">
-		Number: <span data-bind="text: compactNumber(number())"></span>#
-		(+<span data-bind="text: compactNumber(numberRate())"></span>Hz)
+		<ul data-bind="template: { name: 'resourceTemplate', foreach: resourcesVisible, as: 'resource' }"></ul>
 		<ul data-bind="template: { name: function(buyable){return buyable.buyedTemplate;}, foreach: buyed, as: 'buyed' }"></ul>
 		<ul data-bind="template: { name: function(buyable){return buyable.availableTemplate;}, foreach: availables, as: 'buyable' }">
 		</ul>
 	</div>
+
+	<script type="text/html" id="resourceTemplate">
+		<span data-bind="text: name"></span>: 
+		<span data-bind="text: compactNumber(amount())"></span><span data-bind="text: sign"></span>
+		(<span data-bind="text: compactRate(rate())"></span><span data-bind="text: rateSign"></span>)
+	</script>
 
 	<script type="text/html" id="buyedBuildingTemplate">
 		<li><span data-bind="text: originalName"></span></li>
@@ -35,8 +46,8 @@
 		<li>
 			<span data-bind="text: name"></span>
 			x<span data-bind="text: count"></span>
-			+<span data-bind="text: compactNumber(rate())"></span>Hz
-			for <span data-bind="text: compactNumber(cost)"></span>#
+			+<span data-bind="text: rate()"></span>
+			for <span data-bind="text: cost"></span>
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>
 			<button data-bind="enable: canSell(), click: sell">Sell</button>
 		</li>
@@ -44,7 +55,7 @@
 	<script type="text/html" id="availableResearchTemplate">
 		<li>
 			<span data-bind="text: name"></span>
-			for <span data-bind="text: compactNumber(cost)"></span>#
+			for <span data-bind="text: cost"></span>
 			<span data-bind="text: caption"></span>
 			(<span data-bind="text: description"></span>)
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>

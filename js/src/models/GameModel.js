@@ -4,25 +4,18 @@ function GameModel() {
 
 extend(GameModel, [
 	function init() {
-		this.number = ko.observable(0);
 		this.buyed = ko.observableArray([]);
 		this.availables = ko.observableArray([]);
-		var self = this;
-		this.numberRate = ko.computed(function () {
-			var rate = 1;
 
-			var availables = self.availables()
-
-			for (var i = 0, buyable ; buyable = availables[i] ; i++) {
-				if (buyable.rate && buyable.count) {
-					rate += buyable.rate() * buyable.count();
-				}
-			}
-
-			return rate;
-		});
 		this.buyables = buyables;
 		this.initBuyables();
+
+		this.resourcesList = resourcesList;
+		this.resources = resources;
+		this.resourcesVisible = ko.computed(this.resourcesVisibleFunction.bind(this));
+		this.resourcesAsDict = ko.computed(this.resourcesAsDictFunction.bind(this));
+		this.resourcesRates = ko.computed(this.resourcesRatesFunction.bind(this));
+		this.initResources();
 	},
 	function initBuyables() {
 		var game = this;
@@ -54,8 +47,29 @@ extend(GameModel, [
 
 		gameStarted(true);
 	},
+	function initResources() {
+		var resourcesList = this.resourcesList;
+		for (var i = 0, resource ; resource = resourcesList[i] ; i++) {
+			resources[resource.id] = resource;
+			resource.setGame(this);
+		}
+	},
+	function resourcesVisibleFunction() {
+		var resourcesList = this.resourcesList;
+		var resourcesVisible = [];
+		for (var i = 0, resource ; resource = resourcesList[i] ; i++) {
+			if (resource.visible()) {
+				resourcesVisible.push(resource);
+			}
+		}
+
+		return resourcesVisible;
+	},
 	function tick() {
-		this.number(this.number() + this.numberRate());
+		var resourcesRates = this.resourcesRates();
+		var resources = this.resourcesAsDict();
+		resources.i_add(resourcesRates);
+		resources.toResources(this.resources);
 	},
 	function tick_start(interval) {
 		this.tick_stop();
@@ -64,18 +78,42 @@ extend(GameModel, [
 	function tick_stop() { 
 		this.tick.interval = clearInterval(this.tick.interval);
 	},
+	function resourcesAsDictFunction() {
+		var resourcesList = this.resourcesVisible();
+		return new Resources().i_fromResourcesList(resourcesList);
+	},
 	function canBuy(cost) {
-		return this.number() >= cost;
+		var resourcesDict = this.resourcesAsDict();
+		return cost.lte(resourcesDict);
 	},
 	function buy(cost) {
-		this.number(this.number() - cost);
+		var resources = this.resourcesAsDictFunction();
+		resources.i_subtract(cost);
+		resources.toResources(this.resources);
 	},
 	function sell(cost) {
-		this.number(this.number() + cost);
+		var resources = this.resourcesAsDictFunction();
+		resources.i_add(cost);
+		resources.toResources(this.resources);
 	},
 	function addBuyed(item) {
 		if (this.buyed.indexOf(item) == -1) {
 			this.buyed.push(item);
 		}
+	},
+	function resourcesRatesFunction() {
+		var resourcesAmounts = this.resourcesAsDictFunction(),
+			newResourcesAmounts = resourcesAmounts.copy();
+
+		var availables = this.availables();
+		for (var i = 0, buyable ; buyable = availables[i] ; i++) {
+			if (buyable.productionCycle) {
+				buyable.productionCycle(newResourcesAmounts);
+			}
+		}
+
+		var resourcesRates = newResourcesAmounts.subtract(resourcesAmounts);
+
+		return resourcesRates
 	},
 ]);

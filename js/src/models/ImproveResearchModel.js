@@ -18,12 +18,11 @@ extend(ImproveResearchModel, [
 		if (this.renameTo) {
 			target.name(this.renameTo);
 		}
-		var oldRate = target.rate(),
-			newRate = oldRate;
+		var oldRate = target.rate(), newRate;
 		if (this.rateMultiply) {
-			newRate *= this.rateMultiply;
+			newRate = oldRate.scale(this.rateMultiply);
 		} else if (this.rateAdd) {
-			newRate += this.rateAdd;
+			newRate = oldRate.add(this.rateAdd);
 		}
 		target.rate(newRate);
 	},

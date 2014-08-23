@@ -8,7 +8,7 @@ var helpers = {
 				name: data.prequisiteResearch.name,
 				caption: data.prequisiteResearch.caption,
 				description: data.prequisiteResearch.description,
-				cost: data.prequisiteResearch.cost,
+				cost: data.prequisiteResearch.cost.copy(),
 				enabled: data.prequisiteResearch.enabled || function () {
 					return true;
 				},
@@ -19,8 +19,9 @@ var helpers = {
 
 		var building = new BuildingModel({
 			name: data.building.name,
-			cost: data.building.cost,
-			rate: data.building.baseRate,
+			cost: data.building.cost.copy(),
+			rate: data.building.baseRate.copy(),
+			resourceId: data.building.resourceId,
 			enabled: enabled || function() {
 				if (prequisite) {
 					return this.buyables[prequisite].bought();
@@ -33,13 +34,13 @@ var helpers = {
 
 		var researchBaseCost = data.researches.baseCost,
 			researchCostMultiplier = data.researches.costMultiplier;
-		var researchCost = researchBaseCost;
+		var researchCost = researchBaseCost.copy();
 		for (var i = 0, researchData ; researchData = data.researches.items[i] ; i++) {
 			var research = new ImproveResearchModel({
 				name: researchData.name,
 				caption: researchData.caption,
 				description: researchData.description,
-				cost: researchCost,
+				cost: researchCost.copy(),
 				target: data.building.id,
 				renameTo: researchData.renameTo,
 				rateAdd: data.building.baseRate,
@@ -51,6 +52,8 @@ var helpers = {
 				})(researchData.buildingsCountEnabled, prevResearch),
 			}), prevResearch = research;
 			buyables[researchData.id] = research;
+
+			researchCost.i_scale(researchCostMultiplier);
 		}
 	},
 };
@@ -64,16 +67,17 @@ helpers.buildingWithUpgrades(buyables, {
 		name: 'Count',
 		caption: 'Ah, ah, ah!',
 		description: 'Buy numbers',
-		cost: 2,
+		cost: new Resources({numbers: 2}),
 	},
 	building: {
 		id: 'naturals',
 		name: 'Naturals',
-		cost: 1.5,
-		baseRate: 0.25,
+		cost: new Resources({numbers: 1.5}),
+		baseRate: new Resources({numbers: 0.25}),
+		resourceId: 'numbers',
 	},
 	researches: {
-		baseCost: 3,
+		baseCost: new Resources({numbers: 3}),
 		costMultiplier: 1.5,
 		items: [
 			{
@@ -102,7 +106,7 @@ helpers.buildingWithUpgrades(buyables, {
 		name: 'Division',
 		caption: 'You can\'t eat a pie by yourself',
 		description: 'Buy decimals',
-		cost: 4,
+		cost: new Resources({numbers: 4}),
 		enabled: function() {
 			return this.buyables.naturals.count() >= 10;
 		},
@@ -110,11 +114,12 @@ helpers.buildingWithUpgrades(buyables, {
 	building: {
 		id: 'decimals',
 		name: 'Decimals',
-		cost: 4,
-		baseRate: 1,
+		cost: new Resources({numbers: 4}),
+		baseRate: new Resources({numbers: 1}),
+		resourceId: 'numbers',
 	},
 	researches: {
-		baseCost: 10,
+		baseCost: new Resources({numbers: 10}),
 		costMultiplier: 1.5,
 		items: [
 			{
@@ -143,7 +148,7 @@ helpers.buildingWithUpgrades(buyables, {
 		name: 'Polyonyms',
 		caption: 'Solve for x',
 		description: 'Buy algebraics',
-		cost: 8,
+		cost: new Resources({numbers: 8}),
 		enabled: function() {
 			return this.buyables.decimals.count() >= 10;
 		},
@@ -151,11 +156,12 @@ helpers.buildingWithUpgrades(buyables, {
 	building: {
 		id: 'algebraics',
 		name: 'Algebraics',
-		cost: 10,
-		baseRate: 3.5,
+		cost: new Resources({numbers: 10}),
+		baseRate: new Resources({numbers: 3.5}),
+		resourceId: 'numbers',
 	},
 	researches: {
-		baseCost: 25,
+		baseCost: new Resources({numbers: 25}),
 		costMultiplier: 1.5,
 		items: [
 			{
@@ -185,7 +191,7 @@ helpers.buildingWithUpgrades(buyables, {
 		name: 'Set theory',
 		caption: 'Like buying a number in a poke',
 		description: 'Buy sets',
-		cost: 16,
+		cost: new Resources({numbers: 16}),
 		enabled: function() {
 			return this.buyables.algebraics.count() >= 10;
 		},
@@ -193,11 +199,12 @@ helpers.buildingWithUpgrades(buyables, {
 	building: {
 		id: 'sets',
 		name: 'Sets',
-		cost: 25,
-		baseRate: 10,
+		cost: new Resources({numbers: 25}),
+		baseRate: new Resources({numbers: 10}),
+		resourceId: 'numbers',
 	},
 	researches: {
-		baseCost: 65,
+		baseCost: new Resources({numbers: 65}),
 		costMultiplier: 1.5,
 		items: [
 			{

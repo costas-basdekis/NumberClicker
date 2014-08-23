@@ -53,3 +53,25 @@ function compactNumber(number, maxAfterComma) {
 	number = parseInt(number * pow) / pow;
 	return number + suffix;
 }
+
+function compactRate(number, maxAfterComma) {
+	var compact = compactNumber(number, maxAfterComma);
+
+	if (number > 0) {
+		return '+' + compact;
+	} else {
+		return compact;
+	}
+}
+
+// Polyfill
+function keys(obj) {
+	var keys = [];
+	for (var key in obj) {
+		if (obj.hasOwnProperty(key)) {
+			keys.push(key);
+		}
+	}
+
+	return keys;
+}
