@@ -9,14 +9,17 @@ extend(NamedScalar, [
 			this.data[id] = data[id];
 		}
 	},
+	function resourceToString(resource) {
+		var value = this.data[resource];
+		return resource + ": " + compactNumber(value);
+	},
 	function toString() {
-		var data = this.data;
-		return keys(this.data).map(function (e) {
-			return e + ": " + compactRate(data[e]);
-		}).join(', ');
+		return keys(this.data)
+			.map(this.resourceToString.bind(this))
+			.join(', ');
 	},
 	function copy() {
-		return new NamedScalar(this.data);
+		return new this.constructor(this.data);
 	},
 	function add(rhs) {
 		return this.copy().i_add(rhs);

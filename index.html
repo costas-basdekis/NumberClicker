@@ -46,7 +46,7 @@
 		<li>
 			<span data-bind="text: name"></span>
 			x<span data-bind="text: count"></span>
-			+<span data-bind="text: rate()"></span>
+			<span data-bind="text: rate()"></span>
 			for <span data-bind="text: cost"></span>
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>
 			<button data-bind="enable: canSell(), click: sell">Sell</button>
@@ -64,6 +64,7 @@
 	
 	<script type="text/javascript">
 		var myGame = new GameModel();
+		Resources.prototype.resourcesObject = myGame.resources;
 		ko.applyBindings(myGame, elById('myGame'));
 		myGame.tick_start();
 	</script>

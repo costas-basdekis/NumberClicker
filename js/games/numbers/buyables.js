@@ -73,7 +73,7 @@ helpers.buildingWithUpgrades(buyables, {
 		id: 'naturals',
 		name: 'Naturals',
 		cost: new Resources({numbers: 1.5}),
-		baseRate: new Resources({numbers: 0.25}),
+		baseRate: new Resources({numbers: 0.25}, true),
 		resourceId: 'numbers',
 	},
 	researches: {
@@ -115,7 +115,7 @@ helpers.buildingWithUpgrades(buyables, {
 		id: 'decimals',
 		name: 'Decimals',
 		cost: new Resources({numbers: 4}),
-		baseRate: new Resources({numbers: 1}),
+		baseRate: new Resources({numbers: 1}, true),
 		resourceId: 'numbers',
 	},
 	researches: {
@@ -157,7 +157,7 @@ helpers.buildingWithUpgrades(buyables, {
 		id: 'algebraics',
 		name: 'Algebraics',
 		cost: new Resources({numbers: 10}),
-		baseRate: new Resources({numbers: 3.5}),
+		baseRate: new Resources({numbers: 3.5}, true),
 		resourceId: 'numbers',
 	},
 	researches: {
@@ -200,7 +200,7 @@ helpers.buildingWithUpgrades(buyables, {
 		id: 'sets',
 		name: 'Sets',
 		cost: new Resources({numbers: 25}),
-		baseRate: new Resources({numbers: 10}),
+		baseRate: new Resources({numbers: 10}, true),
 		resourceId: 'numbers',
 	},
 	researches: {
