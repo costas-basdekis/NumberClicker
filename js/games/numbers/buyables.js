@@ -232,3 +232,46 @@ helpers.buildingWithUpgrades(buyables, {
 		],
 	},
 });
+
+// Functions
+helpers.buildingWithUpgrades(buyables, {
+	prequisiteResearch: {
+		id: 'map',
+		name: 'Map',
+		caption: 'What goes where',
+		description: 'Buy functions',
+		cost: new Resources({numbers: 10000}),
+		enabled: function() {
+			return this.resources.numbers.amount() >= 5000;
+		},
+	},
+	building: {
+		id: 'functions',
+		name: 'Functions',
+		cost: new Resources({numbers: 15000}),
+		baseRate: new Resources({functions: 1}, true),
+		resourceId: 'numbers',
+	},
+	researches: {
+		baseCost: new Resources({numbers: 30000}),
+		costMultiplier: 1.5,
+		items: [
+			{
+				id: 'continuous',
+				name: 'Continuous Functions',
+				caption: 'It\'s easier when there aren\'t any gaps',
+				description: '+1&part; for Functions',
+				renameTo: 'Continuous Functions',
+				buildingsCountEnabled: 2,
+			},
+			{
+				id: 'differentiable',
+				name: 'Differentiable Functions',
+				caption: 'It\'s even easier if you know the slope',
+				description: '+1&part; for Continuous Functions',
+				renameTo: 'Differentiable Functions',
+				buildingsCountEnabled: 5,
+			},
+		],
+	},
+});
