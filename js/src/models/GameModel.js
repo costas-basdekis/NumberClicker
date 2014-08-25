@@ -3,67 +3,53 @@ function GameModel() {
 }
 
 extend(GameModel, [
-	function init() {
-		this.buyed = ko.observableArray([]);
-		this.availables = ko.observableArray([]);
+	function init(game) {
+		this.buyables = game.buyables;
+		this.buyablesList = game.buyablesList;
+		this.buyablesBought = ko.computed(this.buyablesBoughtFunction.bind(this));
+		this.buyablesAvailable = ko.computed(this.buyablesAvailableFunction.bind(this));
 
-		this.buyables = buyables;
-		this.initBuyables();
-
-		this.resourcesList = resourcesList;
-		this.resources = resources;
+		this.resources = game.resources;
+		this.resourcesList = game.resourcesList;
 		this.resourcesVisible = ko.computed(this.resourcesVisibleFunction.bind(this));
 		this.resourcesAsDict = ko.computed(this.resourcesAsDictFunction.bind(this));
 		this.resourcesRates = ko.computed(this.resourcesRatesFunction.bind(this));
-		this.initResources();
+
+		game.instance(this);
 	},
-	function initBuyables() {
-		var game = this;
-
-		var gameStarted = ko.observable(false);
-
-		function getEnabledComputed(buyableEnabled) {
-			return ko.computed(function enabledComputed() {
-				return gameStarted() && buyableEnabled();
-			});
-		}
-		function addBuyableOnEnabled(buyable) {
-			var added = false;
-			buyable.enabled.subscribe(function onEnabledChange(newValue) {
-				if (!added) {
-					game.availables.push(buyable);
-					added = true;
-				}
-			}, 'change');
-		}
-
-		for (var name in buyables) {
-			var buyable = buyables[name];
-			buyable.enabled = getEnabledComputed(buyable.enabled);
-			addBuyableOnEnabled(buyable);
-			buyable.game = this;
-			this.buyables[name] = buyable;
-		}
-
-		gameStarted(true);
+	function buyablesBoughtFunction() {
+		return this.buyablesList.filter(function(buyable) {
+			return buyable.bought();
+		});
 	},
-	function initResources() {
-		var resourcesList = this.resourcesList;
-		for (var i = 0, resource ; resource = resourcesList[i] ; i++) {
-			resources[resource.id] = resource;
-			resource.setGame(this);
-		}
+	function buyablesAvailableFunction() {
+		return this.buyablesList.filter(function(buyable) {
+			return buyable.available();
+		});
 	},
 	function resourcesVisibleFunction() {
-		var resourcesList = this.resourcesList;
-		var resourcesVisible = [];
-		for (var i = 0, resource ; resource = resourcesList[i] ; i++) {
-			if (resource.visible()) {
-				resourcesVisible.push(resource);
+		return this.resourcesList.filter(function(resource) {
+			return resource.visible();
+		});
+	},
+	function resourcesAsDictFunction() {
+		var resourcesList = this.resourcesVisible();
+		return Resources.fromResourcesList(resourcesList);
+	},
+	function resourcesRatesFunction() {
+		var resourcesAmounts = this.resourcesAsDictFunction(),
+			newResourcesAmounts = resourcesAmounts.copy();
+
+		var buyablesAvailable = this.buyablesAvailable();
+		for (var i = 0, buyable ; buyable = buyablesAvailable[i] ; i++) {
+			if (buyable.productionCycle) {
+				buyable.productionCycle(newResourcesAmounts);
 			}
 		}
 
-		return resourcesVisible;
+		var resourcesRates = newResourcesAmounts.subtract(resourcesAmounts);
+
+		return resourcesRates
 	},
 	function tick() {
 		var resourcesRates = this.resourcesRates();
@@ -78,10 +64,6 @@ extend(GameModel, [
 	function tick_stop() { 
 		this.tick.interval = clearInterval(this.tick.interval);
 	},
-	function resourcesAsDictFunction() {
-		var resourcesList = this.resourcesVisible();
-		return new Resources().i_fromResourcesList(resourcesList);
-	},
 	function canBuy(cost) {
 		var resourcesDict = this.resourcesAsDict();
 		return cost.lte(resourcesDict);
@@ -95,25 +77,5 @@ extend(GameModel, [
 		var resources = this.resourcesAsDictFunction();
 		resources.i_add(cost);
 		resources.toResources(this.resources);
-	},
-	function addBuyed(item) {
-		if (this.buyed.indexOf(item) == -1) {
-			this.buyed.push(item);
-		}
-	},
-	function resourcesRatesFunction() {
-		var resourcesAmounts = this.resourcesAsDictFunction(),
-			newResourcesAmounts = resourcesAmounts.copy();
-
-		var availables = this.availables();
-		for (var i = 0, buyable ; buyable = availables[i] ; i++) {
-			if (buyable.productionCycle) {
-				buyable.productionCycle(newResourcesAmounts);
-			}
-		}
-
-		var resourcesRates = newResourcesAmounts.subtract(resourcesAmounts);
-
-		return resourcesRates
 	},
 ]);

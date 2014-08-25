@@ -14,9 +14,6 @@ extend(Resources, [
 		
 		return result;
 	},
-	function fromResourcesList(resourcesList) {
-		return this._copy().i_fromResourcesList(resourcesList);
-	},
 	function resourceToString(resource) {
 		var resourceObject = this.resourcesObject && this.resourcesObject[resource];
 		if (!resourceObject) {
@@ -44,5 +41,10 @@ extend(Resources, [
 		}
 
 		return this;
+	},
+]);
+extendStatic(Resources, [
+	function fromResourcesList(resourcesList) {
+		return new this({}).i_fromResourcesList(resourcesList);
 	},
 ]);

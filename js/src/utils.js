@@ -16,11 +16,33 @@ function extend(type, attributes, namedAttributes) {
 				function _super(self) {
 					return superAttribute.bind(self);
 				};
-				_super._super = setAttribute._super;
 				return _super;
 			})(type.prototype[name]);
 		}
 		type.prototype[name] = attribute;
+	}
+
+	for (var i in attributes) {
+		var attribute = attributes[i];
+		setAttribute(attribute.name, attribute);
+	}
+	for (var name in namedAttributes) {
+		var attribute = namedAttributes[name];
+		setAttribute(name, attribute);
+	}
+	return type;
+}
+function extendStatic(type, attributes, namedAttributes) {
+	function setAttribute(name, attribute) {
+		if (type.hasOwnProperty(name)) {
+			attribute._super = (function(superAttribute) {
+				function _super() {
+					return superAttribute.bind(type);
+				};
+				return _super;
+			})(type[name]);
+		}
+		type[name] = attribute;
 	}
 
 	for (var i in attributes) {
@@ -76,11 +98,35 @@ function keys(obj) {
 	return keys;
 }
 
-function resourcesFromList(resourcesList) {
-	var resources = {};
-	for (var i = 0, resource ; resource = resourcesList[i] ; i++) {
-		resources[resource.id] = resource;
+function dictFromList(list, keyName) {
+	keyName = keyName || 'id';
+
+	var dict = {};
+	for (var i = 0, item ; item = list[i] ; i++) {
+		var key = item[keyName];
+		dict[key] = item;
 	}
 
-	return resources;
+	return dict;
 }
+
+/* KO computed that updates until it equals a sentinel value */
+ko.oneWayToggle = function oneWayToggle(func, sentinel) {
+	if (arguments.length < 2) {
+		throw new Error('You must specify a sentinel for oneWayToggle');
+	}
+
+	var toggled = false;
+	var toggle = ko.computed(function() {
+		if (toggled) {
+			return sentinel;
+		}
+
+		var newValue = func();
+		toggled = (newValue === sentinel);
+
+		return newValue;
+	});
+
+	return toggle;
+};

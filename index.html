@@ -16,14 +16,17 @@
 
 	<script type="text/javascript" src="js/src/models/ResourceModel.js"></script>
 
+	<script type="text/javascript" src="js/src/helpers.js"></script>
+
+	<script type="text/javascript" src="js/games/numbers/game.js"></script>
 	<script type="text/javascript" src="js/games/numbers/buyables.js"></script>
 	<script type="text/javascript" src="js/games/numbers/resources.js"></script>
 </head>
 <body>
 	<div id="myGame">
 		<ul data-bind="template: { name: 'resourceTemplate', foreach: resourcesVisible, as: 'resource' }"></ul>
-		<ul data-bind="template: { name: function(buyable){return buyable.buyedTemplate;}, foreach: buyed, as: 'buyed' }"></ul>
-		<ul data-bind="template: { name: function(buyable){return buyable.availableTemplate;}, foreach: availables, as: 'buyable' }">
+		<ul data-bind="template: { name: function(buyable){return buyable.buyedTemplate;}, foreach: buyablesBought }"></ul>
+		<ul data-bind="template: { name: function(buyable){return buyable.availableTemplate;}, foreach: buyablesAvailable }">
 		</ul>
 	</div>
 
@@ -65,7 +68,7 @@
 	</script>
 	
 	<script type="text/javascript">
-		var myGame = new GameModel();
+		var myGame = new GameModel(games.numbers);
 		Resources.prototype.resourcesObject = myGame.resources;
 		ko.applyBindings(myGame, elById('myGame'));
 		myGame.tick_start();

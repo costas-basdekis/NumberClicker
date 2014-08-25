@@ -3,20 +3,32 @@ function ResourceModel() {
 }
 
 extend(ResourceModel, [
-	function init(args) {
-		args = args || {};
+	function init(args, instanceObs) {
+		this.instanceObs = instanceObs;
+
 		this.id = args.id;
 		this.name = args.name;
 		this.amount = ko.observable(args.initialAmount || 0);
-		this.visible = ko.observable(args.visible ? true : false);
-		this.sign = args.sign || '';
+		this.sign = args.sign || this.name;
 		this.rateSign = args.rateSign || this.sign + '/s';
-	},
-	function setGame(game) {
-		this.game = game;
 		this.rate = ko.computed(this.rateFunction.bind(this));
+		this.visible = ko.oneWayToggle(this.visibleFunction.bind(this), true);
 	},
 	function rateFunction() {
-		return this.game.resourcesRates().data[this.id];
+		var instance = this.instanceObs();
+		if (!instance) {
+			return 0;
+		}
+
+		var resourcesRates = instance.resourcesRates();
+
+		if (!(this.id in resourcesRates.data)) {
+			return 0;
+		}
+
+		return resourcesRates.data[this.id];
+	},
+	function visibleFunction() {
+		return !!this.amount() || !!this.rate();
 	},
 ]);

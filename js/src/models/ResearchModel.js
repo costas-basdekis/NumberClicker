@@ -4,28 +4,34 @@ function ResearchModel() {
 }
 
 extend(ResearchModel, [
-	function init(args, game) {
-		args = args || {};
-		init._super(this)(args, game);
+	function init(args, instanceObs) {
+		init._super(this)(args, instanceObs);
+		
 		this.caption = args.caption;
 		this.description = args.description;
-		this.bought = ko.observable(false);
 	},
 	function canBuy() {
 		if (!canBuy._super(this)()) {
 			return false;
 		}
+
 		return !this.bought();
+	},
+	function canSell(){
+		return false;
 	},
 	function buy() {
 		if (!buy._super(this)()) {
 			return;
 		}
+
 		this.research();
-		this.bought(true);
+	},
+	function availableFunction() {
+		return this.enabled() && !this.bought();
 	},
 	function research() {
-		this.game.availables.remove(this);
+		//
 	},
 ], {
 	availableTemplate: 'availableResearchTemplate',

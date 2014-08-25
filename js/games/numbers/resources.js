@@ -1,14 +1,15 @@
-var resourcesList = [
-	new ResourceModel({
-		id: 'numbers', name: 'Numbers',
-		sign: '#', rateSign: 'Hz',
-		visible: true, initialAmount: 13.5,
-	}),
-	new ResourceModel({
-		id: 'functions', name: 'Functions',
-		sign: '&fnof;', rateSign: '&part;',
-		visible: true, initialAmount: 13.5,
-	}),
-];
+(function numbersBuyablesInit(game) {
+	game.resourcesList = [
+		new ResourceModel({
+			id: 'numbers', name: 'Numbers',
+			sign: '#', rateSign: 'Hz',
+			initialAmount: 13.5,
+		}, game.instance),
+		new ResourceModel({
+			id: 'functions', name: 'Functions',
+			sign: '&fnof;', rateSign: '&part;',
+		}, game.instance),
+	];
 
-var resources = resourcesFromList(resourcesList);
+	game.resources = dictFromList(game.resourcesList);
+})(games.numbers);
