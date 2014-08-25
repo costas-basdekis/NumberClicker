@@ -6,8 +6,16 @@
 			initialAmount: 13.5,
 		}, game),
 		new ResourceModel({
+			id: 'sets', name: 'Sets',
+			sign: '{}', rateSign: '&cup;',
+		}, game),
+		new ResourceModel({
 			id: 'functions', name: 'Functions',
 			sign: '&fnof;', rateSign: '&part;',
+		}, game),
+		new ResourceModel({
+			id: 'integrals', name: 'Integrals',
+			sign: '&int;', rateSign: '&nabla;',
 		}, game),
 	];
 

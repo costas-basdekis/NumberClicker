@@ -70,3 +70,44 @@ function keys(obj) {
 
 	return keys;
 }
+
+/*
+	Same as Python's {}.items(), only returning dict, not tuple
+*/
+function items(obj) {
+	var items = [];
+	for (var key in obj) {
+		if (obj.hasOwnProperty(key)) {
+			var value = obj[key];
+			items.push({
+				key: key,
+				value: value,
+			});
+		}
+	}
+
+	return items;
+}
+
+extend(Array, [
+	function any(callback) {
+		for (var i = 0 ; i < this.length ; i++) {
+			var element = this[i];
+			if (callback(element)) {
+				return true;
+			}
+		}
+		return false;
+	},
+	function min() {
+		var min = this[0];
+		for (var i = 1 ; i < this.length ; i++) {
+			var element = this[i];
+			if (element < min) {
+				min = element;
+			}
+		}
+
+		return min;
+	}
+]);

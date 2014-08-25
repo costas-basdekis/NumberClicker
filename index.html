@@ -64,7 +64,7 @@
 			<span data-bind="text: name"></span>
 			x<span data-bind="text: count"></span>
 			<span data-bind="html: rate()"></span>
-			for <span data-bind="text: cost"></span>
+			for <span data-bind="html: cost"></span>
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>
 			<button data-bind="enable: canSell(), click: sell">Sell</button>
 		</li>
@@ -72,7 +72,7 @@
 	<script type="text/html" id="availableResearchTemplate">
 		<li>
 			<span data-bind="text: name"></span>
-			for <span data-bind="text: cost"></span>
+			for <span data-bind="html: cost"></span>
 			<span data-bind="text: caption"></span>
 			(<span data-bind="html: description"></span>)
 			<button data-bind="enable: canBuy(), click: buy">Buy</button>

@@ -25,7 +25,6 @@ var buyableHelpers = {
 			name: data.building.name,
 			cost: data.building.cost.copy(),
 			rate: data.building.baseRate.copy(),
-			resourceId: data.building.resourceId,
 			enabledFunction: enabledFunction || function() {
 				var instance = this.game.instance();
 				if (!instance) {

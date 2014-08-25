@@ -11,7 +11,6 @@ extend(BuildingModel, [
 			rate: args.rate,
 		});
 		this.totalRate = ko.computed(this.totalRateFunction.bind(this));
-		this.resourceId = args.resourceId;
 	},
 	function availableFunction() {
 		return this.enabled();
@@ -20,7 +19,27 @@ extend(BuildingModel, [
 		return this.rate().scale(this.count());
 	},
 	function productionCycle(resources) {
-		var totalRate = this.totalRate();
+		var rate = this.rate(), totalRate = this.totalRate();
+		// No buildings
+		if (this.count() == 0) {
+			return;
+		}
+		// Get resources that need to be consumed
+		var consumables = items(rate.data).filter(function(e) {
+			return e.value < 0;
+		});
+		// Get the max amount that can be consumed
+		var counts = consumables.map(function (e) {
+			return Math.floor((resources.data[e.key] || 0) / (-e.value));
+		});
+		if (counts.length) {
+			// Consume as many as we can
+			var count = [this.count(), counts.min()].min();
+			if (count <= 0) {
+				return;
+			}
+			totalRate = rate.scale(count);
+		}
 		resources.i_add(totalRate);
 	},
 ], {
