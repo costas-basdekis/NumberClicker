@@ -16,7 +16,7 @@ extend(BuyableModel, [
 		if (args.enabledFunction) {
 			this.enabledFunction = args.enabledFunction;
 		}
-		this.enabled = ko.oneWayToggle(this.enabledFunction.bind(this), true);
+		this.enabled = koEx.oneWayToggle(this.enabledFunction.bind(this), true);
 		this.available = ko.computed(this.availableFunction.bind(this));
 	},
 	function canBuy() {

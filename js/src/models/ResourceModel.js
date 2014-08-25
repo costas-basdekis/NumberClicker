@@ -12,7 +12,7 @@ extend(ResourceModel, [
 		this.sign = args.sign || this.name;
 		this.rateSign = args.rateSign || this.sign + '/s';
 		this.rate = ko.computed(this.rateFunction.bind(this));
-		this.visible = ko.oneWayToggle(this.visibleFunction.bind(this), true);
+		this.visible = koEx.oneWayToggle(this.visibleFunction.bind(this), true);
 	},
 	function rateFunction() {
 		var instance = this.instanceObs();
