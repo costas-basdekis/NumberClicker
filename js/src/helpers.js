@@ -1,6 +1,5 @@
 var buyableHelpers = {
 	buildingWithUpgrades: function buildingWithUpgrades(game, data) {
-		var instanceObs = game.instance;
 		var buyablesList = game.buyablesList;
 
 		var prequisite = data.building.prequisite,
@@ -16,7 +15,7 @@ var buyableHelpers = {
 				enabledFunction: data.prequisiteResearch.enabledFunction || function () {
 					return true;
 				},
-			}, instanceObs);
+			}, game);
 			buyablesList.push(research);
 			prequisite = data.prequisiteResearch.id;
 		}
@@ -28,7 +27,7 @@ var buyableHelpers = {
 			rate: data.building.baseRate.copy(),
 			resourceId: data.building.resourceId,
 			enabledFunction: enabledFunction || function() {
-				var instance = instanceObs();
+				var instance = this.game.instance();
 				if (!instance) {
 					return false;
 				}
@@ -39,7 +38,7 @@ var buyableHelpers = {
 					return true;
 				}
 			},
-		}, instanceObs);
+		}, game);
 		buyablesList.push(building);
 
 		var researchBaseCost = data.researches.baseCost,
@@ -61,7 +60,7 @@ var buyableHelpers = {
 								(building.count() >= buildingsCountEnabled);
 					};
 				})(researchData.buildingsCountEnabled, prevResearch),
-			}, instanceObs), prevResearch = research;
+			}, game), prevResearch = research;
 			buyablesList.push(research);
 
 			researchCost.i_scale(researchCostMultiplier);

@@ -1,17 +1,20 @@
+inherit(BuyableModel, Model);
 function BuyableModel() {
 	this.init.apply(this, arguments);
 }
 
 extend(BuyableModel, [
-	function init(args, instanceObs) {
-		this.instanceObs = instanceObs;
+	function init(args, game) {
+		init._super(this)(args, game);
 
 		this.originalName = args.name || "";
-		this.id = args.id;
-		this.name = ko.observable(this.originalName);
+		this.makeSaveables({
+			name: this.originalName,
+			count: 0,
+		});
+
 		this.cost = args.cost;
 		this.enabled = args.enabled;
-		this.count = ko.observable(0);
 		this.bought = ko.computed(this.boughtFunction.bind(this));
 		if (args.enabledFunction) {
 			this.enabledFunction = args.enabledFunction;
@@ -20,18 +23,18 @@ extend(BuyableModel, [
 		this.available = ko.computed(this.availableFunction.bind(this));
 	},
 	function canBuy() {
-		var instance = this.instanceObs()
+		var instance = this.game.instance()
 		if (!instance) {
 			return false;
 		}
 		
-		return this.instanceObs().canBuy(this.cost);
+		return this.game.instance().canBuy(this.cost);
 	},
 	function buy() {
 		if (!this.canBuy()) {
 			return false;
 		}
-		this.instanceObs().buy(this.cost);
+		this.game.instance().buy(this.cost);
 		this.count(this.count() + 1);
 
 		return true;
@@ -43,7 +46,7 @@ extend(BuyableModel, [
 		if (!this.canSell()) {
 			return;
 		}
-		this.instanceObs().sell(this.cost);
+		this.game.instance().sell(this.cost);
 		this.count(this.count() - 1);
 	},
 	function boughtFunction() {

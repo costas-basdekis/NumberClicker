@@ -4,8 +4,8 @@ function ImproveResearchModel() {
 }
 
 extend(ImproveResearchModel, [
-	function init(args, instanceObs) {
-		init._super(this)(args, instanceObs);
+	function init(args, game) {
+		init._super(this)(args, game);
 		
 		this.target = args.target;
 		this.renameTo = args.renameTo;
@@ -14,12 +14,12 @@ extend(ImproveResearchModel, [
 	},
 	function researchRename() {
 		if (this.renameTo) {
-			var target = this.instanceObs().buyables[this.target];
+			var target = this.game.instance().buyables[this.target];
 			target.name(this.renameTo);
 		}
 	},
 	function researchReRate() {
-		var target = this.instanceObs().buyables[this.target];
+		var target = this.game.instance().buyables[this.target];
 		var oldRate = target.rate(), newRate;
 		if (this.rateMultiply) {
 			newRate = oldRate.scale(this.rateMultiply);

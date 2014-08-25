@@ -4,11 +4,11 @@
 			id: 'numbers', name: 'Numbers',
 			sign: '#', rateSign: 'Hz',
 			initialAmount: 13.5,
-		}, game.instance),
+		}, game),
 		new ResourceModel({
 			id: 'functions', name: 'Functions',
 			sign: '&fnof;', rateSign: '&part;',
-		}, game.instance),
+		}, game),
 	];
 
 	game.resources = dictFromList(game.resourcesList);

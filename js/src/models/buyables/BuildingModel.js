@@ -4,10 +4,12 @@ function BuildingModel() {
 }
 
 extend(BuildingModel, [
-	function init(args, instanceObs) {
-		init._super(this)(args, instanceObs);
+	function init(args, game) {
+		init._super(this)(args, game);
 		
-		this.rate = ko.observable(args.rate);
+		this.makeSaveables({
+			rate: args.rate,
+		});
 		this.totalRate = ko.computed(this.totalRateFunction.bind(this));
 		this.resourceId = args.resourceId;
 	},

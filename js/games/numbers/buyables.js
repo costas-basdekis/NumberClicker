@@ -1,6 +1,4 @@
 (function numbersBuyablesInit(game) {
-	var instanceObs = game.instance;
-
 	game.buyablesList = [];
 
 	// Naturals
@@ -51,7 +49,7 @@
 			description: 'Buy decimals',
 			cost: new Resources({numbers: 4}),
 			enabledFunction: function() {
-				var instance = instanceObs();
+				var instance = this.game.instance();
 				if (!instance) {
 					return false;
 				}
@@ -99,7 +97,7 @@
 			description: 'Buy algebraics',
 			cost: new Resources({numbers: 8}),
 			enabledFunction: function() {
-				var instance = instanceObs();
+				var instance = this.game.instance();
 				if (!instance) {
 					return false;
 				}
@@ -147,7 +145,7 @@
 			description: 'Buy sets',
 			cost: new Resources({numbers: 16}),
 			enabledFunction: function() {
-				var instance = instanceObs();
+				var instance = this.game.instance();
 				if (!instance) {
 					return false;
 				}
@@ -201,7 +199,7 @@
 			description: 'Buy functions',
 			cost: new Resources({numbers: 10000}),
 			enabledFunction: function() {
-				var instance = instanceObs();
+				var instance = this.game.instance();
 				if (!instance) {
 					return false;
 				}

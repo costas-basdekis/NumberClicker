@@ -4,8 +4,8 @@ function ResearchModel() {
 }
 
 extend(ResearchModel, [
-	function init(args, instanceObs) {
-		init._super(this)(args, instanceObs);
+	function init(args, game) {
+		init._super(this)(args, game);
 		
 		this.caption = args.caption;
 		this.description = args.description;

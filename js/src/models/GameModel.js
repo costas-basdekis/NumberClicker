@@ -1,9 +1,12 @@
+inherit(GameModel, Model);
 function GameModel() {
 	this.init.apply(this, arguments);
 }
 
 extend(GameModel, [
 	function init(game) {
+		init._super(this)({id: 'myGame'}, game);
+
 		this.buyables = game.buyables;
 		this.buyablesList = game.buyablesList;
 		this.buyablesBought = ko.computed(this.buyablesBoughtFunction.bind(this));
