@@ -23,6 +23,7 @@
 
 	<script type="text/javascript" src="js/src/models/ResourceModel.js"></script>
 
+	<script type="text/javascript" src="js/src/Game.js"></script>
 	<script type="text/javascript" src="js/src/helpers.js"></script>
 
 	<script type="text/javascript" src="js/games/numbers/game.js"></script>
@@ -31,6 +32,10 @@
 </head>
 <body>
 	<div id="myGame">
+		<div>
+			<button data-bind="click: game.saveToLocalStorage.bind(game)">Save</button>
+			<button data-bind="click: game.loadFromLocalStorage.bind(game)">Load</button>
+		</div>
 		<ul data-bind="template: { name: 'resourceTemplate', foreach: resourcesVisible, as: 'resource' }"></ul>
 		<ul data-bind="template: { name: function(buyable){return buyable.buyedTemplate;}, foreach: buyablesBought }"></ul>
 		<ul data-bind="template: { name: function(buyable){return buyable.availableTemplate;}, foreach: buyablesAvailable }">
