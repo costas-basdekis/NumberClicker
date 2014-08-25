@@ -47,4 +47,15 @@ extendStatic(Resources, [
 	function fromResourcesList(resourcesList) {
 		return new this({}).i_fromResourcesList(resourcesList);
 	},
+	function saver(item) {
+		return  item;
+	},
+	function loader(state) {
+		return new this(state.data, state.isRate);
+	},
 ]);
+
+SaveManager.customIO[Resources.name] = {
+	saver: Resources.saver.bind(Resources),
+	loader: Resources.loader.bind(Resources),
+};
