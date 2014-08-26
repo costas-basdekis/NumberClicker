@@ -8,6 +8,8 @@ function compactNumber(number, maxAfterComma) {
 	}
 	var suffix = '';
 	var suffixes = 'KMGTPEHOND';
+	var sign = (number < 0) ? -1 : 1;
+	number = Math.abs(number);
 	for (var i = 0, suf ; suf = suffixes[i] ; i++) {
 		if (number < 1000) {
 			break;
@@ -19,7 +21,7 @@ function compactNumber(number, maxAfterComma) {
 	var afterComma = integralLength > maxAfterComma + 1 ? 0 : maxAfterComma + 1 - integralLength;
 	var pow = Math.pow(10, afterComma);
 	number = parseInt(number * pow) / pow;
-	return number + suffix;
+	return sign * number + suffix;
 }
 
 function compactRate(number, maxAfterComma) {
